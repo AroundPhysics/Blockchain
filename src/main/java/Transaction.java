@@ -79,6 +79,9 @@ public class Transaction {
     }
 
     public static String getStringFromKey(Key key) {
+        if (key == null) {
+            return null;
+        }
         return java.util.Base64.getEncoder().encodeToString(key.getEncoded());
     }
 }
