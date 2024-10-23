@@ -2,50 +2,56 @@ import java.util.ArrayList;
 
 public class Blockchain {
     public static ArrayList<Block> blockchain = new ArrayList<>();
-    public static int difficulty = 4; // Set the mining difficulty
+    public static int difficulty = 5;
 
+    // Main function
     public static void main(String[] args) {
+        // Initialize wallets
+        Wallet walletA = new Wallet();
+        Wallet walletB = new Wallet();
+
         // Add genesis block
-        blockchain.add(new Block("Genesis Block", "0"));
-        System.out.println("Trying to Mine block 1... ");
-        blockchain.get(0).mineBlock(difficulty);
+        Block genesisBlock = new Block("0");
+        genesisBlock.mineBlock(difficulty);
+        blockchain.add(genesisBlock);
 
-        // Add more blocks
-        blockchain.add(new Block("Block 2", blockchain.get(blockchain.size() - 1).hash));
-        System.out.println("Trying to Mine block 2... ");
-        blockchain.get(1).mineBlock(difficulty);
+        // Create transactions
+        Block block1 = new Block(genesisBlock.hash);
+        block1.addTransaction(walletA.sendFunds(walletB.publicKey, 10));
+        block1.mineBlock(difficulty);
+        blockchain.add(block1);
 
-        blockchain.add(new Block("Block 3", blockchain.get(blockchain.size() - 1).hash));
-        System.out.println("Trying to Mine block 3... ");
-        blockchain.get(2).mineBlock(difficulty);
+        Block block2 = new Block(block1.hash);
+        block2.addTransaction(walletB.sendFunds(walletA.publicKey, 5));
+        block2.mineBlock(difficulty);
+        blockchain.add(block2);
 
-        System.out.println("\nBlockchain is valid: " + isChainValid());
+        System.out.println("Blockchain is valid: " + isChainValid());
     }
 
-    // Check if the blockchain is valid
+    // Validate blockchain
     public static boolean isChainValid() {
         Block currentBlock;
         Block previousBlock;
         String hashTarget = new String(new char[difficulty]).replace('\0', '0');
 
-        // Loop through blockchain to check hashes
         for (int i = 1; i < blockchain.size(); i++) {
             currentBlock = blockchain.get(i);
             previousBlock = blockchain.get(i - 1);
 
-            // Compare the registered hash and calculated hash
+            // Check if current block's hash is valid
             if (!currentBlock.hash.equals(currentBlock.calculateHash())) {
-                System.out.println("Current Hashes not equal");
+                System.out.println("Invalid block hash");
                 return false;
             }
 
-            // Compare previous hash and previous block's hash
-            if (!previousBlock.hash.equals(currentBlock.previousHash)) {
-                System.out.println("Previous Hashes not equal");
+            // Check if the previous block's hash is correct
+            if (!currentBlock.previousHash.equals(previousBlock.hash)) {
+                System.out.println("Invalid previous block hash");
                 return false;
             }
 
-            // Check if the hash is solved
+            // Check if the block is mined
             if (!currentBlock.hash.substring(0, difficulty).equals(hashTarget)) {
                 System.out.println("This block hasn't been mined");
                 return false;
