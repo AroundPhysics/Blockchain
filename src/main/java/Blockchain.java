@@ -3,35 +3,49 @@ import java.util.ArrayList;
 public class Blockchain {
     public static ArrayList<Block> blockchain = new ArrayList<>();
     public static int difficulty = 5;
-    public static ArrayList<Validator> validators = new ArrayList<>(); // Pool of validators
+    public static ArrayList<Validator> validators = new ArrayList<>();
 
-    // Add validators (usually based on their wallet holdings)
+    // Add validators
     public static void addValidator(Validator validator) {
         validators.add(validator);
     }
 
-    // Main function
-    public static void main(String[] args) {
-        // Initialize wallets
-        Wallet walletA = new Wallet();
-        Wallet walletB = new Wallet();
+    // Add block to blockchain
+    public static boolean addBlock(Block newBlock) {
+        if (validateBlock(newBlock)) {
+            blockchain.add(newBlock);
+            return true;
+        } else {
+            Validator.penalizeValidator(Validator.getValidator(newBlock.minerAddress), Validator.SLASHING_PENALTY);
+            return false;
+        }
+    }
 
-        // Add genesis block
-        Block genesisBlock = new Block("0", walletA.publicKey);
-        genesisBlock.mineBlock(difficulty);
-        blockchain.add(genesisBlock);
+    // Block validation by validators
+    public static boolean validateBlock(Block block) {
+        int validVotes = 0;
+        int invalidVotes = 0;
+        for (Validator v : validators) {
+            boolean vote = v.vote(block);
+            if (vote) {
+                validVotes++;
+            } else {
+                invalidVotes++;
+            }
+        }
+        return validVotes > invalidVotes;
+    }
 
-        // Add validators (wallets acting as validators)
-        addValidator(new Validator(walletA.publicKey, 50));
-        addValidator(new Validator(walletB.publicKey, 30));
-
-        // Select validator for the next block
-        Validator selectedValidator = Validator.selectValidator(validators);
-        System.out.println("Selected validator: " + selectedValidator.publicKey.toString());
-
-        // Validator creates and mines block
-        Block block1 = new Block(genesisBlock.hash, selectedValidator.publicKey);
-        block1.addTransaction(walletA.sendFunds(walletB.publicKey, 10));
-        blockchain.add(block1);
+    // Check blockchain integrity
+    public static boolean isChainValid() {
+        Block currentBlock;
+        Block previousBlock;
+        for (int i = 1; i < blockchain.size(); i++) {
+            currentBlock = blockchain.get(i);
+            previousBlock = blockchain.get(i - 1);
+            if (!currentBlock.hash.equals(currentBlock.calculateHash())) return false;
+            if (!currentBlock.previousHash.equals(previousBlock.hash)) return false;
+        }
+        return true;
     }
 }

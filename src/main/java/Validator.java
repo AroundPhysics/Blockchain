@@ -5,29 +5,41 @@ import java.util.Random;
 public class Validator {
     public PublicKey publicKey;
     public float stake;
+    public float slashedStake = 0;
+    public static final float SLASHING_PENALTY = 10.0f;
+    private static ArrayList<Validator> validators = new ArrayList<>();
 
-    // Constructor
     public Validator(PublicKey publicKey, float stake) {
         this.publicKey = publicKey;
         this.stake = stake;
     }
 
-    // Select a validator based on their stake
-    public static Validator selectValidator(ArrayList<Validator> validators) {
-        float totalStake = 0;
-        for (Validator v : validators) {
-            totalStake += v.stake;
-        }
+    // Add validator to pool
+    public static void addValidator(Validator validator) {
+        validators.add(validator);
+    }
 
-        Random rand = new Random();
-        float randomValue = rand.nextFloat() * totalStake; // Random value in the range of total stakes
+    // Penalize validator for bad behavior
+    public static void penalizeValidator(Validator validator, float penalty) {
+        validator.slash(penalty);
+    }
 
-        float cumulativeStake = 0;
+    // Slash a validator
+    public void slash(float penalty) {
+        stake -= penalty;
+        slashedStake += penalty;
+    }
+
+    // Validator voting on block validity
+    public boolean vote(Block block) {
+        // Simplified: In a real system, validators check block's validity
+        return new Random().nextBoolean();
+    }
+
+    // Get validator by public key
+    public static Validator getValidator(String publicKey) {
         for (Validator v : validators) {
-            cumulativeStake += v.stake;
-            if (cumulativeStake >= randomValue) {
-                return v; // This validator gets selected
-            }
+            if (v.publicKey.toString().equals(publicKey)) return v;
         }
         return null;
     }
