@@ -15,17 +15,19 @@ public class BlockchainWebSocketServer extends WebSocketServer {
     @Override
     public void onOpen(WebSocket conn, ClientHandshake handshake) {
         peers.add(conn);
+        System.out.println("New connection from: " + conn.getRemoteSocketAddress());
     }
 
     @Override
     public void onClose(WebSocket conn, int code, String reason, boolean remote) {
         peers.remove(conn);
+        System.out.println("Connection closed: " + conn.getRemoteSocketAddress());
     }
 
     @Override
     public void onMessage(WebSocket conn, String message) {
-        // Handle new block or transaction message
-        Blockchain.addBlock(deserializeBlock(message));
+        System.out.println("Message from peer: " + message);
+        // Process new blocks or transactions
     }
 
     @Override
@@ -35,18 +37,13 @@ public class BlockchainWebSocketServer extends WebSocketServer {
 
     @Override
     public void onStart() {
-        System.out.println("WebSocket Server started.");
+        System.out.println("WebSocket server started.");
     }
 
+    // Broadcast a message to all peers
     public void broadcast(String message) {
         for (WebSocket peer : peers) {
             peer.send(message);
         }
-    }
-
-    // Simulated deserialization
-    private Block deserializeBlock(String message) {
-        // Convert message to Block object
-        return new Block("", "");
     }
 }

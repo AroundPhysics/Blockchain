@@ -15,7 +15,7 @@ public class BlockchainWebSocketClient extends WebSocketClient {
 
     @Override
     public void onMessage(String message) {
-        // Process new block or transaction
+        System.out.println("Message from peer: " + message);
     }
 
     @Override

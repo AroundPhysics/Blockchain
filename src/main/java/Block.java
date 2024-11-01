@@ -4,23 +4,22 @@ import java.util.Date;
 public class Block {
     public String hash;
     public String previousHash;
+    private String data; // Block data (transaction details)
     private long timeStamp;
     private int nonce;
     public ArrayList<Transaction> transactions = new ArrayList<>();
-    public String minerAddress;
-    public static final float MINER_REWARD = 10.0f;
 
     // Constructor
-    public Block(String previousHash, String minerAddress) {
+    public Block(String previousHash, String data) {
         this.previousHash = previousHash;
-        this.minerAddress = minerAddress;
+        this.data = data;
         this.timeStamp = new Date().getTime();
         this.hash = calculateHash();
     }
 
     // Hash calculation
     public String calculateHash() {
-        return StringUtil.applySha256(previousHash + Long.toString(timeStamp) + Integer.toString(nonce) + transactions.toString());
+        return StringUtil.applySha256(previousHash + Long.toString(timeStamp) + Integer.toString(nonce) + data);
     }
 
     // Mine block (Proof of Work)
@@ -30,7 +29,7 @@ public class Block {
             nonce++;
             hash = calculateHash();
         }
-        transactions.add(new Transaction(null, minerAddress, MINER_REWARD)); // Reward miner
+        System.out.println("Block Mined!!! : " + hash);
     }
 
     // Add transaction to block

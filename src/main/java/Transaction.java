@@ -10,8 +10,8 @@ public class Transaction {
         this.amount = amount;
     }
 
-    // Transaction to string
+    @Override
     public String toString() {
-        return sender + "->" + recipient + ": " + amount;
+        return sender + " -> " + recipient + " : " + amount;
     }
 }
